@@ -1,0 +1,65 @@
+# Fit Together — netlify.toml for MANUAL (drag & drop) deploys.
+#
+# Copied into the deploy package as netlify.toml. It differs from the repo's
+# netlify.toml in one way: no [build] command, because the site is already
+# built, and the dropped folder IS the site root, so publish is "." not "dist".
+#
+# Do not deploy this file's folder from git — netlify.toml is the one for that.
+
+[build]
+  publish = "."
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# API routes must come BEFORE the SPA fallback, or "/*" would swallow them.
+[[redirects]]
+  from = "/api/strava/start"
+  to = "/.netlify/functions/strava?action=start"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/strava/callback"
+  to = "/.netlify/functions/strava?action=callback"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/strava/exchange"
+  to = "/.netlify/functions/strava?action=exchange"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/strava/sync"
+  to = "/.netlify/functions/strava?action=sync"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/calendar/sync"
+  to = "/.netlify/functions/calendar"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/gemini/chat"
+  to = "/.netlify/functions/gemini"
+  status = 200
+  force = true
+
+# Function sources sit inside the publish root for manual deploys. They hold no
+# secrets (those come from environment variables), but there is no reason to
+# serve them, so return 404 for that path.
+[[redirects]]
+  from = "/netlify/*"
+  to = "/index.html"
+  status = 404
+
+# SPA fallback last, so deep links like /challenges survive a refresh.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
